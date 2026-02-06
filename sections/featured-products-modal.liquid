@@ -109,6 +109,7 @@
       const clickTest = document.getElementById('click-test');
       const drawer = document.querySelector('cart-notification');
       const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
+      const quantitySpan = document.querySelector('.product-form__input.product-form__quantity .quantity-cart');
 
       const openModal = () => modal.classList.add('is-active');
       const closeModal = () => modal.classList.remove('is-active');
@@ -164,8 +165,6 @@
 
           addProductViaAjax(form)
             .then((data) => {
-              console.log('Товар додано через AJAX');
-
               if (window.publish && window.PUB_SUB_EVENTS) {
                 publish(PUB_SUB_EVENTS.cartUpdate, {
                   source: 'product-form',
@@ -176,6 +175,9 @@
               if (drawer && data.sections) {
                 drawer.renderContents(data);
               }
+
+              //Update quantity on PDP form
+              quantitySpan.textContent = data.quantity;
 
               closeModal();
             })
