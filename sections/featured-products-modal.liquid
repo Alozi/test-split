@@ -24,7 +24,7 @@
     }
   {%- endstyle -%}
 
-  <div id="featuredProductsModal" class="featured-products-modal is-active">
+  <div id="featuredProductsModal" class="featured-products-modal">
     <div class="featured-products-modal__overlay"></div>
 
     <div class="featured-products-modal__container{% if section.settings.container-reverse %} featured-products-modal__container--reverse{% endif %} section-{{ section.id }}-padding">
@@ -85,6 +85,8 @@
           </h2>
         {% endif %}
 
+        <button id="click-test" type="button">click</button>
+
         <div class="featured-products-modal__text">
           {% assign product_title_bold = '<b>' | append: product.title | append: '</b>' %}
           <h3>{{ section.settings.description | replace: 'PRODUCT', product_title_bold }}</h3>
@@ -104,17 +106,85 @@
       const modal = document.getElementById('featuredProductsModal');
       const closeBtn = modal.querySelector('.featured-products-modal__close');
       const overlay = modal.querySelector('.featured-products-modal__overlay');
+      const clickTest = document.getElementById('click-test');
+      const drawer = document.querySelector('cart-notification');
+      const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
 
-      function openModal() {
-        modal.classList.add('is-active');
-      }
+      const openModal = () => modal.classList.add('is-active');
+      const closeModal = () => modal.classList.remove('is-active');
 
-      function closeModal() {
-        modal.classList.remove('is-active');
-      }
+      closeBtn?.addEventListener('click', closeModal);
+      overlay?.addEventListener('click', closeModal);
 
-      closeBtn.addEventListener('click', closeModal);
-      overlay.addEventListener('click', closeModal);
+      // Product form submit intercept
+      const initProductFormListener = () => {
+        if (!productForm) return;
+
+        productForm.addEventListener(
+          'submit',
+          function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            openModal();
+          },
+          { capture: true }
+        );
+      };
+
+      // Add product with AJAX to cart
+      const addProductViaAjax = (form) => {
+        const formData = new FormData(form);
+
+        if (drawer) {
+          formData.append(
+            'sections',
+            drawer.getSectionsToRender().map((section) => section.id)
+          );
+          formData.append('sections_url', window.location.pathname);
+        }
+
+        return fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        }).then((response) => response.json());
+      };
+
+      //Button handler
+      const initClickTest = () => {
+        if (!clickTest) return;
+
+        clickTest.addEventListener('click', () => {
+          const form = document.querySelector('product-form form');
+
+          if (!form) {
+            console.error('Product form not found');
+            return;
+          }
+
+          addProductViaAjax(form)
+            .then((data) => {
+              console.log('Товар додано через AJAX');
+
+              if (window.publish && window.PUB_SUB_EVENTS) {
+                publish(PUB_SUB_EVENTS.cartUpdate, {
+                  source: 'product-form',
+                  productVariantId: data.variant_id,
+                });
+              }
+
+              if (drawer && data.sections) {
+                drawer.renderContents(data);
+              }
+
+              closeModal();
+            })
+            .catch((error) => console.error('Error:', error));
+        });
+      };
+
+      initProductFormListener();
+      initClickTest();
     });
   </script>
 {% endif %}
