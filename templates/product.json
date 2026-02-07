@@ -102,10 +102,28 @@
     },
     "featured_products_modal_L4Dinc": {
       "type": "featured-products-modal",
+      "blocks": {
+        "product_qbVdrw": {
+          "type": "product",
+          "settings": {
+            "product": "jordan-socks"
+          }
+        },
+        "product_4WeLpt": {
+          "type": "product",
+          "settings": {
+            "product": "nike-icon-air-force-1"
+          }
+        }
+      },
+      "block_order": [
+        "product_qbVdrw",
+        "product_4WeLpt"
+      ],
       "name": "Feature products modal",
       "settings": {
         "enable_modal": true,
-        "show_once": true,
+        "show_modal_once": false,
         "container-reverse": false,
         "title": "COMPLETE YOUR PURCHASE",
         "description": "You are trying to add PRODUCT to the cart.",

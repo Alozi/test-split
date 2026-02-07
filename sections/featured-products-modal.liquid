@@ -85,8 +85,6 @@
           </h2>
         {% endif %}
 
-        <button id="click-test" type="button">click</button>
-
         <div class="featured-products-modal__text">
           {% assign product_title_bold = '<b>' | append: product.title | append: '</b>' %}
           <h3>{{ section.settings.description | replace: 'PRODUCT', product_title_bold }}</h3>
@@ -94,9 +92,64 @@
           <p>{{ section.settings.text | replace: 'MONEY', product_save_money_bold }}</p>
         </div>
 
-        <div class="featured-products-modal__products"></div>
+        <div class="featured-products-modal__products">
+          {% for block in section.blocks %}
+            {% assign product = all_products[block.settings.product] %}
 
-        <div class="featured-products-modal__buy-buttons"></div>
+            {% if product != blank %}
+              <div class="featured-product" {{ block.shopify_attributes }}>
+                <div class="featured-product__image">
+                  {% if product.featured_image %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 400 }}"
+                      alt="{{ product.title }}"
+                      loading="lazy"
+                      width="88px"
+                      height="100px"
+                    >
+                  {% endif %}
+                </div>
+
+                <div class="featured-product__content">
+                  <h3 class="featured-product__title">
+                    {{ product.title }}
+                  </h3>
+
+                  {% if product.type %}
+                    <div class="featured-product__subtitle">
+                      {{ product.type }}
+                    </div>
+                  {% endif %}
+
+                  {% assign first_variant = product.selected_or_first_available_variant %}
+                  {% if first_variant.sku != blank %}
+                    <div class="featured-product__sku">SKU: {{ first_variant.sku }}</div>
+                  {% endif %}
+
+                  <div class="featured-product__prices">
+                    {% if first_variant.compare_at_price > first_variant.price %}
+                      <span class="featured-product__price featured-product__price--sale">
+                        {{ first_variant.price | money_without_trailing_zeros }}
+                      </span>
+
+                      <span class="featured-product__compare">
+                        {{ first_variant.compare_at_price | money_without_trailing_zeros }}
+                      </span>
+                    {% else %}
+                      <span class="featured-product__price">
+                        {{ first_variant.price | money_without_trailing_zeros }}
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="featured-products-modal__buy-buttons">
+          <button id="click-test" type="button">click</button>
+        </div>
       </div>
     </div>
   </div>
