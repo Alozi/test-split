@@ -88,8 +88,28 @@
         <div class="featured-products-modal__text">
           {% assign product_title_bold = '<b>' | append: product.title | append: '</b>' %}
           <h3>{{ section.settings.description | replace: 'PRODUCT', product_title_bold }}</h3>
-          {% assign product_save_money_bold = '<b class="featured-products-modal__saved">$13!</b>' %}
-          <p>{{ section.settings.text | replace: 'MONEY', product_save_money_bold }}</p>
+
+          {% assign total_saving = 0 %}
+
+          {% for block in section.blocks %}
+            {% assign product = all_products[block.settings.product] %}
+            {% if product != blank %}
+              {% assign first_variant = product.selected_or_first_available_variant %}
+              {% if first_variant.compare_at_price > first_variant.price %}
+                {% assign saving = first_variant.compare_at_price | minus: first_variant.price %}
+                {% assign total_saving = total_saving | plus: saving %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {% if total_saving > 0 %}
+            {% assign total_saving_formatted = total_saving | money_without_trailing_zeros %}
+            {% assign product_save_money_bold = '<b class="featured-products-modal__saved">'
+              | append: total_saving_formatted
+              | append: '</b>'
+            %}
+            <p>{{ section.settings.text | replace: 'MONEY', product_save_money_bold }}</p>
+          {% endif %}
         </div>
 
         <div class="featured-products-modal__products">
