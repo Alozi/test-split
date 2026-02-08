@@ -167,8 +167,27 @@
           {% endfor %}
         </div>
 
-        <div class="featured-products-modal__buy-buttons">
-          <button id="click-test" type="button">click</button>
+        <div class="featured-products-modal__actions">
+          <button id="add-all-to-cart" class="btn btn--primary featured-products-modal__add-to-cart" type="button">
+            Add to Cart
+            <div class="loading__spinner hidden">
+              <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org">
+                <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+              </svg>
+            </div>
+          </button>
+          <button
+            id="continue-to-cart"
+            class="btn btn--secondary featured-products-modal__continue-to-cart"
+            type="button"
+          >
+            Continue to the Cart
+            <div class="loading__spinner hidden">
+              <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org">
+                <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+              </svg>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -185,7 +204,8 @@
       const modal = document.getElementById('featuredProductsModal');
       const closeBtn = modal.querySelector('.featured-products-modal__close');
       const overlay = modal.querySelector('.featured-products-modal__overlay');
-      const clickTest = document.getElementById('click-test');
+      // const addAllToCartButton = document.getElementById('add-all-to-cart');
+      const continueToCartButton = document.getElementById('continue-to-cart');
       const drawer = document.querySelector('cart-notification');
       const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
       const quantitySpan = document.querySelector('.product-form__input.product-form__quantity .quantity-cart');
@@ -240,8 +260,8 @@
         );
       };
 
-      // Add product with AJAX to cart
-      const addProductViaAjax = (form) => {
+      // Add single product with AJAX to cart
+      const addSingleProductViaAjax = (form) => {
         const formData = new FormData(form);
 
         if (drawer) {
@@ -259,11 +279,11 @@
         }).then((response) => response.json());
       };
 
-      //Button handler
-      const initClickTest = () => {
-        if (!clickTest) return;
+      // Continue to cart button handler
+      const addSingleProductToCartHandler = () => {
+        if (!continueToCartButton) return;
 
-        clickTest.addEventListener('click', () => {
+        continueToCartButton.addEventListener('click', () => {
           const form = document.querySelector('product-form form');
 
           if (!form) {
@@ -271,7 +291,12 @@
             return;
           }
 
-          addProductViaAjax(form)
+          continueToCartButton.classList.add('btn--loading');
+          continueToCartButton.setAttribute('aria-disabled', 'true');
+          const filler = continueToCartButton.querySelector('.loading__spinner');
+          if (filler) filler.classList.remove('hidden');
+
+          addSingleProductViaAjax(form)
             .then((data) => {
               if (window.publish && window.PUB_SUB_EVENTS) {
                 publish(PUB_SUB_EVENTS.cartUpdate, {
@@ -289,12 +314,17 @@
 
               closeModal();
             })
-            .catch((error) => console.error('Error:', error));
+            .catch((error) => console.error('Error:', error))
+            .finally(() => {
+              continueToCartButton.classList.remove('btn--loading');
+              continueToCartButton.removeAttribute('aria-disabled');
+              if (filler) filler.classList.add('hidden');
+            });
         });
       };
 
       initProductFormListener();
-      initClickTest();
+      addSingleProductToCartHandler();
     });
   </script>
 {% endif %}
