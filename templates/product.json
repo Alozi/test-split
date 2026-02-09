@@ -125,6 +125,7 @@
         "enable_modal": true,
         "show_modal_once": false,
         "container-reverse": false,
+        "image": "shopify://shop_images/9e0f58204ad3a80f06f30ba082435c5a.jpg",
         "title": "COMPLETE YOUR PURCHASE",
         "description": "You are trying to add PRODUCT to the cart.",
         "text": "Complete your look and save MONEY",
