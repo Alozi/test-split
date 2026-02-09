@@ -21,6 +21,7 @@
 }
 
 .featured-products-modal__container {
+  border: 1px solid #F5F5F5;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -133,6 +134,7 @@
     margin-bottom: 10px;
     letter-spacing: 0;
     height: 20px;
+    color: #464646;
 
     b {
       font-weight: 700;
@@ -155,6 +157,7 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0;
+    color: #000000;
 
     b {
       font-weight: 700;
@@ -210,7 +213,7 @@
       line-height: 18px;
       letter-spacing: 0;
       font-weight: 700;
-      color: #000000;
+      color: #262C3E;
 
       @media (max-width: 768px) {
         font-size: 10px;
@@ -270,7 +273,7 @@
 
 .featured-products-modal__actions {
   display: grid;
-  grid-template-columns: 172px auto;
+  grid-template-columns: auto auto;
   gap: 10px;
 
   @media (max-width: 1024px) {
