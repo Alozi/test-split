@@ -202,6 +202,7 @@
   .featured-product {
     display: flex;
     gap: 10px;
+    text-decoration: none;
 
     @media (max-width: 768px) {
       gap: 5px;

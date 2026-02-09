@@ -118,7 +118,8 @@
 
             {% if product != blank %}
               {% assign first_variant = product.selected_or_first_available_variant %}
-              <div
+              <a
+                href="{{ product.url}}"
                 class="featured-product"
                 data-variant-id="{{ first_variant.id }}"
                 {{ block.shopify_attributes }}
@@ -167,7 +168,7 @@
                     {% endif %}
                   </div>
                 </div>
-              </div>
+              </a>
             {% endif %}
           {% endfor %}
         </div>
