@@ -3,10 +3,10 @@
 
   {%- style -%}
     .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_vertically | times: 0.75 | round: 0 }}px;
-      padding-bottom :{{ section.settings.padding_vertically | times: 0.75 | round: 0 }}px;
-      padding-left: {{ section.settings.padding_horizontally | times: 0.75 | round: 0 }}px;
-      padding-right: {{ section.settings.padding_horizontally | times: 0.75 | round: 0 }}px;
+      padding-top: {{ section.settings.padding_vertically | times: 0.5 | round: 0 }}px;
+      padding-bottom :{{ section.settings.padding_vertically | times: 0.5 | round: 0 }}px;
+      padding-left: {{ section.settings.padding_horizontally | times: 0.5 | round: 0 }}px;
+      padding-right: {{ section.settings.padding_horizontally | times: 0.5 | round: 0 }}px;
     }
 
     @media screen and (min-width: 750px) {
@@ -232,10 +232,12 @@
           return;
         }
 
+        document.body.style.overflow = 'hidden';
         modal.classList.add('is-active');
       };
 
       const closeModal = () => {
+        document.body.style.overflow = '';
         modal.classList.remove('is-active');
 
         if (window.featuredProductsSettings?.showOnlyOnce) {
