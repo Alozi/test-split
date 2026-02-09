@@ -217,16 +217,16 @@
       const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
       const quantitySpan = document.querySelector('.product-form__input.product-form__quantity .quantity-cart');
 
-      // Show modal only once with sessionStorage
+      // Show modal only once with localStorage
       const MODAL_STORAGE_KEY = 'featuredProductsModalShown';
       const showOnlyOnce = window.featuredProductsSettings?.showOnlyOnce;
 
       const wasModalShown = () => {
-        return sessionStorage.getItem(MODAL_STORAGE_KEY) === 'true';
+        return localStorage.getItem(MODAL_STORAGE_KEY) === 'true';
       };
 
       const markModalAsShown = () => {
-        sessionStorage.setItem(MODAL_STORAGE_KEY, 'true');
+        localStorage.setItem(MODAL_STORAGE_KEY, 'true');
       };
 
       const openModal = () => {
