@@ -1,4 +1,4 @@
-{% if template == 'product' and section.settings.enable_modal %}
+{% if template == 'product' and section.settings.enable_modal and section.blocks.size > 0 %}
   {{ 'section-featured-products-modal.css' | asset_url | stylesheet_tag }}
 
   {%- style -%}
@@ -120,6 +120,7 @@
               {% assign first_variant = product.selected_or_first_available_variant %}
               <a
                 href="{{ product.url}}"
+                target="_blank"
                 class="featured-product"
                 data-variant-id="{{ first_variant.id }}"
                 {{ block.shopify_attributes }}
