@@ -117,7 +117,12 @@
             {% assign product = all_products[block.settings.product] %}
 
             {% if product != blank %}
-              <div class="featured-product" {{ block.shopify_attributes }}>
+              {% assign first_variant = product.selected_or_first_available_variant %}
+              <div
+                class="featured-product"
+                data-variant-id="{{ first_variant.id }}"
+                {{ block.shopify_attributes }}
+              >
                 <div class="featured-product__image">
                   {% if product.featured_image %}
                     <img
@@ -204,8 +209,8 @@
       const modal = document.getElementById('featuredProductsModal');
       const closeBtn = modal.querySelector('.featured-products-modal__close');
       const overlay = modal.querySelector('.featured-products-modal__overlay');
-      // const addAllToCartButton = document.getElementById('add-all-to-cart');
       const continueToCartButton = document.getElementById('continue-to-cart');
+      const addAllToCartButton = document.getElementById('add-all-to-cart');
       const drawer = document.querySelector('cart-notification');
       const productForm = document.querySelector('form[data-type="add-to-cart-form"]');
       const quantitySpan = document.querySelector('.product-form__input.product-form__quantity .quantity-cart');
@@ -260,27 +265,8 @@
         );
       };
 
-      // Add single product with AJAX to cart
-      const addSingleProductViaAjax = (form) => {
-        const formData = new FormData(form);
-
-        if (drawer) {
-          formData.append(
-            'sections',
-            drawer.getSectionsToRender().map((section) => section.id)
-          );
-          formData.append('sections_url', window.location.pathname);
-        }
-
-        return fetch(window.Shopify.routes.root + 'cart/add.js', {
-          method: 'POST',
-          body: formData,
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        }).then((response) => response.json());
-      };
-
       // Continue to cart button handler
-      const addSingleProductToCartHandler = () => {
+      const initAddSingleProductHandler = () => {
         if (!continueToCartButton) return;
 
         continueToCartButton.addEventListener('click', () => {
@@ -296,7 +282,22 @@
           const filler = continueToCartButton.querySelector('.loading__spinner');
           if (filler) filler.classList.remove('hidden');
 
-          addSingleProductViaAjax(form)
+          const formData = new FormData(form);
+
+          if (drawer) {
+            formData.append(
+              'sections',
+              drawer.getSectionsToRender().map((section) => section.id)
+            );
+            formData.append('sections_url', window.location.pathname);
+          }
+
+          fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          })
+            .then((response) => response.json())
             .then((data) => {
               if (window.publish && window.PUB_SUB_EVENTS) {
                 publish(PUB_SUB_EVENTS.cartUpdate, {
@@ -309,8 +310,9 @@
                 drawer.renderContents(data);
               }
 
-              //Update quantity on PDP form
-              quantitySpan.textContent = data.quantity;
+              if (quantitySpan) {
+                quantitySpan.textContent = data.quantity;
+              }
 
               closeModal();
             })
@@ -323,8 +325,80 @@
         });
       };
 
+      // Add all products button handler
+      const initAddMultitypeProductToCartHandler = () => {
+        if (!addAllToCartButton) return;
+
+        addAllToCartButton.addEventListener('click', () => {
+          const form = document.querySelector('product-form form');
+
+          if (!form) {
+            console.error('Product form not found');
+            return;
+          }
+
+          addAllToCartButton.classList.add('btn--loading');
+          addAllToCartButton.setAttribute('aria-disabled', 'true');
+          const filler = addAllToCartButton.querySelector('.loading__spinner');
+          if (filler) filler.classList.remove('hidden');
+
+          const drawer = document.querySelector('cart-notification');
+          const mainVariantId = parseInt(form.querySelector('[name="id"]').value);
+          const mainQuantityInput = document.querySelector('.product-form__quantity [name="quantity"]');
+          const mainQuantity = mainQuantityInput ? parseInt(mainQuantityInput.value) : 1;
+
+          const items = [{ id: mainVariantId, quantity: mainQuantity }];
+
+          document.querySelectorAll('.featured-product').forEach((el) => {
+            const variantId = parseInt(el.dataset.variantId);
+            if (variantId) items.push({ id: variantId, quantity: 1 });
+          });
+
+          if (!items.length) return console.warn('No products to add!');
+
+          const body = { items };
+          if (drawer) {
+            body.sections = drawer.getSectionsToRender().map((s) => s.id);
+            body.sections_url = window.location.pathname;
+          }
+
+          fetch('/cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify(body),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (quantitySpan) {
+                quantitySpan.textContent = data.quantity;
+              }
+
+              if (drawer && data.sections) {
+                Object.entries(data.sections).forEach(([id, html]) => {
+                  const sectionEl = document.getElementById(id);
+                  if (sectionEl) {
+                    sectionEl.innerHTML = html;
+                  }
+                });
+              }
+
+              closeModal();
+            })
+            .catch((err) => console.error('Error adding all products:', err))
+            .finally(() => {
+              addAllToCartButton.classList.remove('btn--loading');
+              addAllToCartButton.removeAttribute('aria-disabled');
+              if (filler) filler.classList.add('hidden');
+            });
+        });
+      };
+
       initProductFormListener();
-      addSingleProductToCartHandler();
+      initAddSingleProductHandler();
+      initAddMultitypeProductToCartHandler();
     });
   </script>
 {% endif %}
