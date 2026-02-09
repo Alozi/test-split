@@ -385,6 +385,10 @@
                     sectionEl.innerHTML = html;
                   }
                 });
+
+                if (typeof drawer.open === 'function') {
+                  drawer.open();
+                }
               }
 
               closeModal();
